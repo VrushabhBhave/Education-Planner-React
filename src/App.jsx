@@ -1,4 +1,4 @@
-import { useState, useRef} from "react";
+import { useState, useRef, useEffect} from "react";
 import { IoMdAdd } from "react-icons/io";
 import { IoMdRemove } from "react-icons/io";
 
@@ -7,9 +7,26 @@ function App(){
   const [hour, setHours] = useState("");
   const [subjectList, setSubjectList] = useState([]);
   let count = useRef(1);
-  const subInput = useRef(20);
+  const subInput = useRef(null);
+  
+  useEffect(() => {
+    const savedList = JSON.parse(localStorage.getItem("subjectList"));
+    if(savedList && savedList.length > 0){
+      setSubjectList(savedList);
+      const maxId = savedList.reduce((max, item) => item.id > max ? item.id : max, 0);
+      count.current = maxId + 1;
+    }
+  }, [])
+  
+  useEffect(() => {
+    localStorage.setItem("subjectList", JSON.stringify(subjectList));
+  }, [subjectList])
 
   function handleToSubmit(){
+    if(subject.trim() === "" || hour === ""){
+      alert("Enter all data!");
+      return;
+    };
     let obj = {
       id: count.current++,
       subject: subject,
@@ -31,7 +48,7 @@ function App(){
     <>
       <div className="flex flex-col items-center w-[100%] ">
           <div className="heading">
-            <h1 className="text-3xl my-3">Geekster Education Planner</h1>
+            <h1 className="text-lg sm:text-3xl my-3">Geekster Education Planner</h1>
           </div>
         <div className="form-container flex flex-col sm:flex-row items-center m-10 mt-3 gap-5 p-4">
           <input type="text" placeholder="Subject" className="border-2 w-50 px-3 py-1 text-xl rounded-xl" value={subject} onChange={(e) => setSubject(e.target.value)} ref={subInput}/>
